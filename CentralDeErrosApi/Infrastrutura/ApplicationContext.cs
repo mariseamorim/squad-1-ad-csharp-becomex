@@ -13,13 +13,13 @@ namespace CentralDeErrosApi.Infrastrutura
         {
 
         }
-
         public DbSet<Error> Errors { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<ErrorOccurrence> ErrorOccurrences { get; set; }
         public DbSet<Situation> Situations { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<Ambiente> Ambiente { get; set; }
+        public object Environments { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {       

@@ -16,7 +16,7 @@ namespace CentralDeErrosApi.Models
             public int LevelId { get; set; }
 
             [Column("Level")]
-            [StringLength(30)]
+            [StringLength(105)]
             [Required]
             public string LevelName { get; set; }
 

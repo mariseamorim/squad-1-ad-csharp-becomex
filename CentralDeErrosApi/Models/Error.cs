@@ -11,7 +11,7 @@ namespace CentralDeErrosApi.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ErrorId { get; set; }
 
-        [Column("Codee")]
+        [Column("Code")]
         [Required]
         public int Code { get; set; }
 
