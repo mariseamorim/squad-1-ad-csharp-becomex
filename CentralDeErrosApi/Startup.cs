@@ -14,6 +14,9 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Reflection;
 using System.IO;
+using CentralDeErrosApi.Infrastrutura;
+using Microsoft.EntityFrameworkCore;
+using CentralDeErrosApi.Infrastrutura.CustomFilters;
 
 namespace CentralDeErrosApi
 {
@@ -29,42 +32,55 @@ namespace CentralDeErrosApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+           
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
-            // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen(c =>
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddDbContext<ApplicationContext>(x => x.UseSqlServer(Configuration.GetConnectionString("default")));
+                 
+            services.AddSwaggerGen(swagger =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                swagger.SwaggerDoc(
+               "v1",
+               new OpenApiInfo
+               {
+                   Title = "Projeto Final Acelera Dev C#",
+                   Version = "v1",
+                   Description = "Api da central de erros",
+                   Contact = new OpenApiContact
+                   {
+                       Name = "Squad-Acelera-Dev-Becomex",
+                       Email = "marisemfs@gmail.com"
+                   }
+               });
+
+              /*  swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
-                    Version = "v1",
-                    Title = "ToDo API",
-                    Description = "A simple example ASP.NET Core Web API",
-                    TermsOfService = new Uri("https://example.com/terms"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Shayne Boyer",
-                        Email = string.Empty,
-                        Url = new Uri("https://twitter.com/spboyer"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "Use under LICX",
-                        Url = new Uri("https://example.com/license"),
-                    }
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Scheme = "bearer"
                 });
+
+                swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
+
+                string applicationPath =
+                PlatformServices.Default.Application.ApplicationBasePath;
+
+                string applicationName =
+                PlatformServices.Default.Application.ApplicationName;
+
+                string xmlPathDoc =
+                Path.Combine(applicationPath, $"{applicationName}.xml");
+
+                swagger.IncludeXmlComments(xmlPathDoc);*/
+
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
-            });
+          
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -79,6 +95,15 @@ namespace CentralDeErrosApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+            //app.UseMvc();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                    "Projeto Final");
             });
         }
     }

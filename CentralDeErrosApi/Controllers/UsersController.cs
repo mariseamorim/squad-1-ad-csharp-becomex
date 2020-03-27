@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CentralDeErrosApi.DTO;
+using CentralDeErrosApi.Service;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentralDeErrosApi.Controllers
@@ -9,36 +12,44 @@ namespace CentralDeErrosApi.Controllers
     [Route("api/[controller]")]
     public class UsersController : Controller
     {
-        // GET: api/<controller>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly UserService _userManagementService;
+        private readonly SignInManager<IdentityUser> _signInManager;
+
+        public UsersController(UserService userManagementService,
+                                SignInManager<IdentityUser> signInManager)
         {
-            return new string[] { "value1", "value2" };
+            _signInManager = signInManager;
+            _userManagementService = userManagementService;
         }
 
-        // GET api/<controller>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpPost("Registrar")]
+        public async Task<ActionResult> Registrar(RegisterUserViewModel viewModel)
         {
-            return "value";
+            if (!ModelState.IsValid) return BadRequest(ModelState.Values.SelectMany(e => e.Errors));
+
+           // var result = await _userManagementService.Create(viewModel);
+
+            //if (!result.Succeeded) return BadRequest(result.Errors);
+
+            viewModel.Senha = "";
+            viewModel.ConfirmaSenha = "";
+
+            return Ok(viewModel);
         }
 
-        // POST api/<controller>
-        [HttpPost]
-        public void Post([FromBody]string value)
+        [HttpPost("Entrar")]
+        public async Task<ActionResult> Login(LoginUserViewModel viewModel)
         {
-        }
+            if (!ModelState.IsValid) return BadRequest(ModelState.Values.SelectMany(e => e.Errors));
 
-        // PUT api/<controller>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+            var result = await _signInManager.PasswordSignInAsync(viewModel.Email, viewModel.Senha, false, true);
 
-        // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            if (!result.Succeeded)
+            {
+                return BadRequest("Usuário ou senha inválido.");
+            }
+
+            return Ok(viewModel);//(await _userManagementService.GerarJWT(viewModel.Email));
         }
     }
 }
