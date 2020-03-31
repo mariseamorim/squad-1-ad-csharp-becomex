@@ -2,45 +2,173 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using CentralDeErrosApi.DTO;
+using CentralDeErrosApi.Interfaces;
+using CentralDeErrosApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
-    public class ErrorOccurrencesController : Controller
+    public class ErrorOccurrencesController : ControllerBase
     {
-        // GET: api/<controller>
+        private readonly IErrorOccurrence  _service;
+        private readonly IUser _userService;
+        private readonly IError _errorService;
+        private readonly ISituation _situationService;
+        private readonly IMapper _mapper;
+
+        public ErrorOccurrencesController(IErrorOccurrence service, IUser userService, IError errorService, ISituation situationService, IMapper mapper)
+        {
+            _service = service;
+            _userService = userService;
+            _errorService = errorService;
+            _situationService = situationService;
+            _mapper = mapper;
+        }
+
+        // GET: api/ErrorOccurrences
         [HttpGet]
-        public IEnumerable<string> Get()
+        public ActionResult<IEnumerable<ErrorOccurrenceDTO>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var errorOccurrences = _service.ListOccurencesByLevel(1);
+
+            if (errorOccurrences == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(errorOccurrences.
+                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        ToList());
+            }
         }
 
-        // GET api/<controller>/5
+        // GET api/<controller>/{id}
+        [HttpGet("Level={levelId}")]
+        public ActionResult<IEnumerable<ErrorOccurrenceDTO>> GetErrorOccurrencesByLevel(int levelId)
+        {
+            var errorOccurrences = _service.ListOccurencesByLevel(levelId);
+
+            if (errorOccurrences == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(errorOccurrences.
+                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        ToList());
+            }
+        }
+
+        // POST: api/ErrorOccurrences/Delete/1
+        [HttpPost("Delete/{value}")]
+        public ActionResult<ErrorOccurrence> DeleteErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (_service.ConsultErrorOccurrenceById(value.ErrorOccurrenceId) == null)
+                return BadRequest("400 BadRequest: ErrorOccurence does not exists.");
+
+            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.DeleteErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
+        }
+
+        // POST: api/ErrorOccurrences/File/1
+        [HttpPost("File/{value}")]
+        public ActionResult<ErrorOccurrence> FileErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (_service.ConsultErrorOccurrenceById(value.ErrorOccurrenceId) == null)
+                return BadRequest("400 BadRequest: ErrorOccurence does not exists.");
+
+            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.FileErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
+        }
+
+        //GET: api/Errors/1/2/0/0
+        //[HttpGet("Environment={ambiente}&&OrderBy={campoOrdenacao}&&Field={campoBuscado}&&Search={textoBuscado}")]
+        [HttpGet("{ambiente}/{campoOrdenacao}/{campoBuscado}/{textoBuscado}")]
+        public ActionResult<List<ErrorOccurrenceDTO>> GetErrorFilter(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado)
+        {
+            var errorOccurrences = _service.Consult(ambiente, campoOrdenacao, campoBuscado, textoBuscado);
+
+            if (errorOccurrences == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(errorOccurrences.
+                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        ToList());
+            }
+        }
+
+        // GET: api/ErrorOccurrences/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<ErrorOccurrenceDTO> GetErrorOccurrence(int id)
         {
-            return "value";
+            var errorOccurrence = _service.ConsultErrorOccurrenceById(id);
+
+            if (errorOccurrence == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<ErrorOccurrenceDTO>(errorOccurrence));
         }
 
-        // POST api/<controller>
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/<controller>/5
+        // PUT: api/ErrorOccurrences/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public ActionResult<ErrorOccurrenceDTO> PutErrorOccurrence(int id, ErrorOccurrence errorOccurrence)
         {
+            if (id != errorOccurrence.ErrorOccurrenceId)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(errorOccurrence)));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_service.ErrorOccurrenceExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
-        // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // POST: api/ErrorOccurrences
+        [HttpPost]
+        public ActionResult<ErrorOccurrence> PostErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_userService.UserExists(value.UserId))
+                return BadRequest("400 BadRequest: User does not exists.");
+
+            if (!_errorService.ErrorExists(value.ErrorId))
+                return BadRequest("400 BadRequest: Error does not exists.");
+
+            if (!_situationService.SituationExists(value.SituationId))
+                return BadRequest("400 BadRequest: Situation does not exists.");
+
+            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
         }
     }
 }

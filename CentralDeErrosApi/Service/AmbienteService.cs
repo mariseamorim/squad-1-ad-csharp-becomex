@@ -20,7 +20,7 @@ namespace CentralDeErrosApi.Service
 
         public Ambiente RegisterOrUpdateAmbiente(Ambiente ambiente)
         {
-            var state = ambiente.EnvironmentId == 0 ? EntityState.Added : EntityState.Modified;
+            var state = ambiente.AmbienteId == 0 ? EntityState.Added : EntityState.Modified;
             _context.Entry(ambiente).State = state;
             _context.SaveChanges();
             return ambiente;
@@ -38,7 +38,7 @@ namespace CentralDeErrosApi.Service
 
         public bool AmbienteExists(int id)
         {
-            return _context.Ambiente.Any(e => e.EnvironmentId == id);
+            return _context.Ambiente.Any(e => e.AmbienteId == id);
         }
     }
 }

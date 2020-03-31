@@ -26,7 +26,7 @@ namespace CentralDeErrosApi.Models
         public string Description { get; set; }
 
         [ForeignKey("Ambiente_Id"), Required]
-        public int EAmbiente_Id { get; set; }
+        public int Ambiente_Id { get; set; }
 
         [Column("Ambiente_Id"), Required]
         public Ambiente Ambiente { get; set; }// referencia 

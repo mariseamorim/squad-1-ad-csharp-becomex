@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Interfaces
 {
-    interface IAmbiente
+    public interface IAmbiente
     {
         Ambiente RegisterOrUpdateAmbiente(Ambiente ambiente);
 

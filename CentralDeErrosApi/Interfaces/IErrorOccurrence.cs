@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Interfaces
 {
-    public interface IErrorOccurence
+    public interface IErrorOccurrence
     {
         ErrorOccurrence RegisterOrUpdateErrorOccurrence(ErrorOccurrence errorOccurrence);
 

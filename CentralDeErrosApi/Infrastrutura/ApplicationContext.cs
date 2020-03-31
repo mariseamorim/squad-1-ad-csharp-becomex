@@ -9,7 +9,7 @@ namespace CentralDeErrosApi.Infrastrutura
 {
     public class ApplicationContext : DbContext
     {
-        public ApplicationContext(DbContextOptions builder) : base(builder)
+        public ApplicationContext(DbContextOptions<ApplicationContext> builder) : base(builder)
         {
 
         }

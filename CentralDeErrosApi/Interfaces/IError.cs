@@ -12,7 +12,7 @@ namespace CentralDeErrosApi.Interfaces
 
         Error ConsultError(int id);
 
-        List<Error> Consult(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado);
+        List<Error> Consult(int ambiente, int inputOrder, int inputSearch, string textSearch);
 
         List<Error> ConsultAllErrors();
 

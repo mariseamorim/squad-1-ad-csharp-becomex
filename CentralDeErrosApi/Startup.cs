@@ -32,11 +32,11 @@ namespace CentralDeErrosApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           
+
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<ApplicationContext>(x => x.UseSqlServer(Configuration.GetConnectionString("default")));
-                 
+
             services.AddSwaggerGen(swagger =>
             {
                 swagger.SwaggerDoc(
@@ -53,26 +53,26 @@ namespace CentralDeErrosApi
                    }
                });
 
-              /*  swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Scheme = "bearer"
-                });
+                /*  swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+                  {
+                      Type = SecuritySchemeType.Http,
+                      BearerFormat = "JWT",
+                      In = ParameterLocation.Header,
+                      Scheme = "bearer"
+                  });
 
-                swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
+                  swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
 
-                string applicationPath =
-                PlatformServices.Default.Application.ApplicationBasePath;
+                  string applicationPath =
+                  PlatformServices.Default.Application.ApplicationBasePath;
 
-                string applicationName =
-                PlatformServices.Default.Application.ApplicationName;
+                  string applicationName =
+                  PlatformServices.Default.Application.ApplicationName;
 
-                string xmlPathDoc =
-                Path.Combine(applicationPath, $"{applicationName}.xml");
+                  string xmlPathDoc =
+                  Path.Combine(applicationPath, $"{applicationName}.xml");
 
-                swagger.IncludeXmlComments(xmlPathDoc);*/
+                  swagger.IncludeXmlComments(xmlPathDoc);*/
 
             });
         }
@@ -80,7 +80,7 @@ namespace CentralDeErrosApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-          
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -91,12 +91,6 @@ namespace CentralDeErrosApi
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-            //app.UseMvc();
 
             app.UseSwagger();
 

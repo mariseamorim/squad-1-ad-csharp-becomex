@@ -11,7 +11,7 @@ namespace CentralDeErrosApi.Models
         [Column("Id")]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int EnvironmentId { get; set; }
+        public int AmbienteId { get; set; }
 
         [Column("Ambiente")]
         [StringLength(30)]

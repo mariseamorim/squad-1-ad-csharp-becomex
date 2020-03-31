@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Service
 {
-    public class ErrorOccurenceService : IErrorOccurence
+    public class ErrorOccurenceService : IErrorOccurrence
     {
 
         private readonly ApplicationContext _context;

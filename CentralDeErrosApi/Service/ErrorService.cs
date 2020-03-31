@@ -22,7 +22,7 @@ namespace CentralDeErrosApi.Service
 
         public Error RegisterOrUpdateError(Error error)
         {
-            if (_context.Ambiente.Any(e => e.EnvironmentId == error.EAmbiente_Id) &&
+            if (_context.Ambiente.Any(e => e.AmbienteId == error.Ambiente_Id) &&
                 _context.Levels.Any(l => l.LevelId == error.LevelId))
             {
                 var state = error.ErrorId == 0 ? EntityState.Added : EntityState.Modified;
@@ -61,10 +61,10 @@ namespace CentralDeErrosApi.Service
                 else if (campoBuscado == 3)
                     errorsSearchList = _context.ErrorOccurrences.Where(x => x.Origin == textoBuscado).Select(x => x.Error).ToList();
 
-                errorsSearchList = errorsSearchList.Where(x => x.EAmbiente_Id == ambiente || ambiente <= 0).ToList();
+                errorsSearchList = errorsSearchList.Where(x => x.Ambiente_Id == ambiente || ambiente <= 0).ToList();
             }
             else
-                errorsSearchList = _context.Errors.Where(x => x.EAmbiente_Id == ambiente || ambiente <= 0).ToList();
+                errorsSearchList = _context.Errors.Where(x => x.Ambiente_Id == ambiente || ambiente <= 0).ToList();
 
             // Campo ordenação
             // 1 - Level
