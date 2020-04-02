@@ -38,18 +38,25 @@ namespace CentralDeErrosApi.Controllers
         }
 
         [HttpPost("Entrar")]
-        public async Task<ActionResult> Login(LoginUserViewModel viewModel)
+        public async Task<ActionResult<dynamic>> Login(LoginUserViewModel viewModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState.Values.SelectMany(e => e.Errors));
 
             var result = await _signInManager.PasswordSignInAsync(viewModel.Email, viewModel.Senha, false, true);
-
+            
             if (!result.Succeeded)
-            {
                 return BadRequest("Usuário ou senha inválido.");
-            }
+            
+            //jorge incluido
+            var token = TokenService.GenerateToken(result);
+            return new
+            {
+                result,
+                token
 
-            return Ok(viewModel);//(await _userManagementService.GerarJWT(viewModel.Email));
+            };
+
+           // return Ok(viewModel);//(await _userManagementService.GerarJWT(viewModel.Email));
         }
     }
 }

@@ -17,6 +17,9 @@ using System.IO;
 using CentralDeErrosApi.Infrastrutura;
 using Microsoft.EntityFrameworkCore;
 using CentralDeErrosApi.Infrastrutura.CustomFilters;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CentralDeErrosApi
 {
@@ -32,11 +35,32 @@ namespace CentralDeErrosApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            //jorge incluido
+            services.AddCors();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<ApplicationContext>(x => x.UseSqlServer(Configuration.GetConnectionString("default")));
 
+            //jorge incluido
+            var key = Encoding.ASCII.GetBytes(Settings.Secret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(x =>
+                {
+                    x.RequireHttpsMetadata = false;
+                    x.SaveToken = true;
+                    x.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+        
             services.AddSwaggerGen(swagger =>
             {
                 swagger.SwaggerDoc(
@@ -88,8 +112,15 @@ namespace CentralDeErrosApi
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            // jorge incluido
+            app.UseRouting();            
 
+            app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSwagger();
