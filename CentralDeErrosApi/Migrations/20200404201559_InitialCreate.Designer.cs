@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CentralDeErrosApi.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200331225541_InitialCreate")]
+    [Migration("20200404201559_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,109 +21,23 @@ namespace CentralDeErrosApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("CentralDeErrosApi.Models.Ambiente", b =>
+            modelBuilder.Entity("CentralDeErrosApi.Models.Environment", b =>
                 {
                     b.Property<int>("EnvironmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("Id")
+                        .HasColumnName("ID")
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AmbienteName")
+                    b.Property<string>("EnvironmentName")
                         .IsRequired()
-                        .HasColumnName("Ambiente")
+                        .HasColumnName("Environment")
                         .HasColumnType("nvarchar(30)")
                         .HasMaxLength(30);
 
                     b.HasKey("EnvironmentId");
 
-                    b.ToTable("Ambiente");
-                });
-
-            modelBuilder.Entity("CentralDeErrosApi.Models.Error", b =>
-                {
-                    b.Property<int>("ErrorId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("Id")
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AmbienteEnvironmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Code")
-                        .HasColumnName("Code")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnName("Description")
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
-
-                    b.Property<int>("EAmbiente_Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LevelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnName("Title")
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
-
-                    b.HasKey("ErrorId");
-
-                    b.HasIndex("AmbienteEnvironmentId");
-
-                    b.HasIndex("LevelId");
-
-                    b.ToTable("Error");
-                });
-
-            modelBuilder.Entity("CentralDeErrosApi.Models.ErrorOccurrence", b =>
-                {
-                    b.Property<int>("ErrorOccurrenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("Id")
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnName("Date_Time")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnName("Details")
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
-
-                    b.Property<int>("ErrorId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Origin")
-                        .IsRequired()
-                        .HasColumnName("Origin")
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
-
-                    b.Property<int>("SituationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ErrorOccurrenceId");
-
-                    b.HasIndex("ErrorId");
-
-                    b.HasIndex("SituationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ErrorOccurrence");
+                    b.ToTable("Environment");
                 });
 
             modelBuilder.Entity("CentralDeErrosApi.Models.Level", b =>
@@ -143,6 +57,71 @@ namespace CentralDeErrosApi.Migrations
                     b.HasKey("LevelId");
 
                     b.ToTable("Level");
+                });
+
+            modelBuilder.Entity("CentralDeErrosApi.Models.LogErrorOccurrence", b =>
+                {
+                    b.Property<int>("ErrorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("Id")
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Code")
+                        .HasColumnName("CodeErro")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnName("Date_Time")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnName("Details")
+                        .HasColumnType("nvarchar(2000)")
+                        .HasMaxLength(2000);
+
+                    b.Property<int>("EnvironmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Environmente_Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LevelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasColumnName("Origin")
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
+
+                    b.Property<int>("SituationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnName("Title")
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsersUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ErrorId");
+
+                    b.HasIndex("EnvironmentId");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("SituationId");
+
+                    b.HasIndex("UsersUserId");
+
+                    b.ToTable("LogErrorOccurrence");
                 });
 
             modelBuilder.Entity("CentralDeErrosApi.Models.Situation", b =>
@@ -205,26 +184,17 @@ namespace CentralDeErrosApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CentralDeErrosApi.Models.Error", b =>
+            modelBuilder.Entity("CentralDeErrosApi.Models.LogErrorOccurrence", b =>
                 {
-                    b.HasOne("CentralDeErrosApi.Models.Ambiente", "Ambiente")
-                        .WithMany("Errors")
-                        .HasForeignKey("AmbienteEnvironmentId")
+                    b.HasOne("CentralDeErrosApi.Models.Environment", "Environment")
+                        .WithMany()
+                        .HasForeignKey("EnvironmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CentralDeErrosApi.Models.Level", "Level")
-                        .WithMany("Errors")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CentralDeErrosApi.Models.ErrorOccurrence", b =>
-                {
-                    b.HasOne("CentralDeErrosApi.Models.Error", "Error")
                         .WithMany()
-                        .HasForeignKey("ErrorId")
+                        .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -234,11 +204,9 @@ namespace CentralDeErrosApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CentralDeErrosApi.Models.Users", "User")
+                    b.HasOne("CentralDeErrosApi.Models.Users", null)
                         .WithMany("ErrorOccurrences")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UsersUserId");
                 });
 #pragma warning restore 612, 618
         }

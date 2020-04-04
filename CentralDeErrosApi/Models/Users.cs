@@ -40,6 +40,6 @@ namespace CentralDeErrosApi.Models
         [Required]
         public DateTime Expiration { get; set; }
 
-        public ICollection<ErrorOccurrence> ErrorOccurrences { get; set; }
+        public ICollection<LogErrorOccurrence> ErrorOccurrences { get; set; }
     }
 }

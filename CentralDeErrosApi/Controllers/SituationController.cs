@@ -2,43 +2,102 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using CentralDeErrosApi.DTO;
+using CentralDeErrosApi.Interfaces;
+using CentralDeErrosApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
     public class SituationController : Controller
     {
-        // GET: api/<controller>
+        private readonly ISituation _service;
+        private readonly IMapper _mapper;
+
+        public SituationController(ISituation service, IMapper mapper)
+        {
+            _service = service;
+            _mapper = mapper;
+        }
+        /// <summary>
+        /// Listar todas as situações.
+        /// </summary>
+        // GET: api/Situations
         [HttpGet]
-        public IEnumerable<string> Get()
+        public ActionResult<IEnumerable<SituationDTO>> GetSituations()
         {
-            return new string[] { "value1", "value2" };
+            var situations = _service.ConsultAllSituations();
+
+            if (situations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(situations.
+                        Select(x => _mapper.Map<SituationDTO>(x)).
+                        ToList());
+            }
         }
 
-        // GET api/<controller>/5
+        /// <summary>
+        /// Listar todas a situação pelo id.
+        /// </summary>
+        // GET: api/Situations/
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<SituationDTO> GetSituation(int id)
         {
-            return "value";
-        }
+            var situation = _service.ConsultSituationById(id);
 
-        // POST api/<controller>
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
+            if (situation == null)
+            {
+                return NotFound();
+            }
 
-        // PUT api/<controller>/5
+            return Ok(_mapper.Map<SituationDTO>(situation));
+        }
+        /// <summary>
+        /// Alterar situação.
+        /// </summary>
+        // GET: api/Situations/
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public ActionResult<SituationDTO> PutSituation(int id, Situation situation)
         {
-        }
+            if (id != situation.SituationId)
+            {
+                return BadRequest();
+            }
 
-        // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+            try
+            {
+                return Ok(_mapper.Map<SituationDTO>(_service.RegisterOrUpdateSituation(situation)));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_service.SituationExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+        /// <summary>
+        ///Cadastrar situação.
+        /// </summary>
+        // POST: api/Situations
+        [HttpPost]
+        public ActionResult<SituationDTO> PostSituation([FromBody] SituationDTO value)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            return Ok(_mapper.Map<SituationDTO>(_service.RegisterOrUpdateSituation(_mapper.Map<Situation>(value))));
         }
     }
 }

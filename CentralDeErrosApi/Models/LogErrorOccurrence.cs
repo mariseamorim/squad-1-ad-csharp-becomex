@@ -7,44 +7,48 @@ using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Models
 {
-    [Table("ErrorOccurrence")]
-    public class ErrorOccurrence
+    [Table("LogErrorOccurrence")]
+    public class LogErrorOccurrence
     {
         [Column("Id")]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ErrorOccurrenceId { get; set; }
+        public int ErrorId { get; set; }
 
         [Column("Origin")]
         [StringLength(200)]
         [Required]
         public string Origin { get; set; }
+        [ForeignKey("Environment_Id"), Required]
+        public int Environmente_Id { get; set; }
+
+        [Column("Title")]
+        [StringLength(200)]
+        [Required]
+        public string Title { get; set; }
+
+        [Column("CodeErro")]
+        [Required]
+        public int Code { get; set; }
 
         [Column("Details")]
         [StringLength(2000)]
         [Required]
         public string Details { get; set; }
 
+        [Column("Environment_Id"), Required]
+        public Situation Situation { get; set; }
+
+        [ForeignKey("Level_Id"), Required]
+        public int LevelId { get; set; }
+
         [Column("Date_Time")]
         [Required]
         public DateTime DateTime { get; set; }
 
-        [ForeignKey("User_Id"), Required]
-        public int UserId { get; set; }
-
-        [Column("User_Id"), Required]
-        public Users User { get; set; }// referencia 
-
-        [ForeignKey("Error_Id"), Required]
-        public int ErrorId { get; set; }
-
-        [Column("Error_Id"), Required]
-        public Error Error { get; set; }// referencia 
-
         [ForeignKey("Situation_Id"), Required]
         public int SituationId { get; set; }
 
-        [Column("Situation_Id"), Required]
-        public Situation Situation { get; set; }// referencia 
+       
     }
 }

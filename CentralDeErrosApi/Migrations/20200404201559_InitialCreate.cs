@@ -8,16 +8,16 @@ namespace CentralDeErrosApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Ambiente",
+                name: "Environment",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Ambiente = table.Column<string>(maxLength: 30, nullable: false)
+                    Environment = table.Column<string>(maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ambiente", x => x.Id);
+                    table.PrimaryKey("PK_Environment", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,37 +64,7 @@ namespace CentralDeErrosApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Error",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(maxLength: 200, nullable: false),
-                    Description = table.Column<string>(maxLength: 200, nullable: false),
-                    EAmbiente_Id = table.Column<int>(nullable: false),
-                    AmbienteEnvironmentId = table.Column<int>(nullable: false),
-                    LevelId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Error", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Error_Ambiente_AmbienteEnvironmentId",
-                        column: x => x.AmbienteEnvironmentId,
-                        principalTable: "Ambiente",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Error_Level_LevelId",
-                        column: x => x.LevelId,
-                        principalTable: "Level",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ErrorOccurrence",
+                name: "LogErrorOccurrence",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -103,77 +73,80 @@ namespace CentralDeErrosApi.Migrations
                     Details = table.Column<string>(maxLength: 2000, nullable: false),
                     Date_Time = table.Column<DateTime>(nullable: false),
                     UserId = table.Column<int>(nullable: false),
-                    ErrorId = table.Column<int>(nullable: false),
-                    SituationId = table.Column<int>(nullable: false)
+                    SituationId = table.Column<int>(nullable: false),
+                    CodeErro = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(maxLength: 200, nullable: false),
+                    Environmente_Id = table.Column<int>(nullable: false),
+                    EnvironmentId = table.Column<int>(nullable: false),
+                    LevelId = table.Column<int>(nullable: false),
+                    UsersUserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ErrorOccurrence", x => x.Id);
+                    table.PrimaryKey("PK_LogErrorOccurrence", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ErrorOccurrence_Error_ErrorId",
-                        column: x => x.ErrorId,
-                        principalTable: "Error",
+                        name: "FK_LogErrorOccurrence_Environment_EnvironmentId",
+                        column: x => x.EnvironmentId,
+                        principalTable: "Environment",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LogErrorOccurrence_Level_LevelId",
+                        column: x => x.LevelId,
+                        principalTable: "Level",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ErrorOccurrence_Situation_SituationId",
+                        name: "FK_LogErrorOccurrence_Situation_SituationId",
                         column: x => x.SituationId,
                         principalTable: "Situation",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ErrorOccurrence_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_LogErrorOccurrence_Users_UsersUserId",
+                        column: x => x.UsersUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Error_AmbienteEnvironmentId",
-                table: "Error",
-                column: "AmbienteEnvironmentId");
+                name: "IX_LogErrorOccurrence_EnvironmentId",
+                table: "LogErrorOccurrence",
+                column: "EnvironmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Error_LevelId",
-                table: "Error",
+                name: "IX_LogErrorOccurrence_LevelId",
+                table: "LogErrorOccurrence",
                 column: "LevelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ErrorOccurrence_ErrorId",
-                table: "ErrorOccurrence",
-                column: "ErrorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ErrorOccurrence_SituationId",
-                table: "ErrorOccurrence",
+                name: "IX_LogErrorOccurrence_SituationId",
+                table: "LogErrorOccurrence",
                 column: "SituationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ErrorOccurrence_UserId",
-                table: "ErrorOccurrence",
-                column: "UserId");
+                name: "IX_LogErrorOccurrence_UsersUserId",
+                table: "LogErrorOccurrence",
+                column: "UsersUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ErrorOccurrence");
+                name: "LogErrorOccurrence");
 
             migrationBuilder.DropTable(
-                name: "Error");
+                name: "Environment");
+
+            migrationBuilder.DropTable(
+                name: "Level");
 
             migrationBuilder.DropTable(
                 name: "Situation");
 
             migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Ambiente");
-
-            migrationBuilder.DropTable(
-                name: "Level");
         }
     }
 }

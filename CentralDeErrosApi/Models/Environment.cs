@@ -1,24 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CentralDeErrosApi.Models
 {
-    [Table("Ambiente")]
-    public class Ambiente
+    [Table("Environment")]
+    public class Environment
     {
-        [Column("Id")]
+        [Column("ID")]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int AmbienteId { get; set; }
+        public int EnvironmentId { get; set; }
 
-        [Column("Ambiente")]
+        [Column("Environment")]
         [StringLength(30)]
         [Required]
-        public string AmbienteName { get; set; }
+        public string EnvironmentName { get; set; }
 
-        public ICollection<Error> Errors { get; set; }
 
     }
 }

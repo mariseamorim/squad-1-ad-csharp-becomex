@@ -19,8 +19,6 @@ namespace CentralDeErrosApi.Models
             [StringLength(105)]
             [Required]
             public string LevelName { get; set; }
-
-            public ICollection<Error> Errors { get; set; }
         }
     }
 

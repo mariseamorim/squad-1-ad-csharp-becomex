@@ -2,10 +2,8 @@
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Service
 {
@@ -15,7 +13,7 @@ namespace CentralDeErrosApi.Service
 
         public LevelService(ApplicationContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
         public Level RegisterOrUpdateLevel(Level level)

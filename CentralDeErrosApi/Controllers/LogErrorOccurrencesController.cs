@@ -9,31 +9,28 @@ using CentralDeErrosApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
-    public class ErrorOccurrencesController : ControllerBase
+    public class LogErrorOccurrencesController : ControllerBase
     {
-        private readonly IErrorOccurrence  _service;
-        private readonly IUser _userService;
-        private readonly IError _errorService;
+        private readonly ILogErrorOccurrence  _service;
         private readonly ISituation _situationService;
         private readonly IMapper _mapper;
 
-        public ErrorOccurrencesController(IErrorOccurrence service, IUser userService, IError errorService, ISituation situationService, IMapper mapper)
+        public LogErrorOccurrencesController(ILogErrorOccurrence service, ISituation situationService, IMapper mapper)
         {
             _service = service;
-            _userService = userService;
-            _errorService = errorService;
             _situationService = situationService;
             _mapper = mapper;
         }
-
+        /// <summary>
+        /// Listar todas as ocorrencia.
+        /// </summary>
         // GET: api/ErrorOccurrences
         [HttpGet]
-        public ActionResult<IEnumerable<ErrorOccurrenceDTO>> Get()
+        public ActionResult<IEnumerable<LogErrorOccurrenceDTO>> Get()
         {
             var errorOccurrences = _service.ListOccurencesByLevel(1);
 
@@ -44,14 +41,16 @@ namespace CentralDeErrosApi.Controllers
             else
             {
                 return Ok(errorOccurrences.
-                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        Select(x => _mapper.Map<LogErrorOccurrenceDTO>(x)).
                         ToList());
             }
         }
-
+        /// <summary>
+        /// Listar uma ocorrencia por LevelId.
+        /// </summary>
         // GET api/<controller>/{id}
         [HttpGet("Level={levelId}")]
-        public ActionResult<IEnumerable<ErrorOccurrenceDTO>> GetErrorOccurrencesByLevel(int levelId)
+        public ActionResult<IEnumerable<LogErrorOccurrenceDTO>> GetErrorOccurrencesByLevel(int levelId)
         {
             var errorOccurrences = _service.ListOccurencesByLevel(levelId);
 
@@ -62,41 +61,48 @@ namespace CentralDeErrosApi.Controllers
             else
             {
                 return Ok(errorOccurrences.
-                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        Select(x => _mapper.Map<LogErrorOccurrenceDTO>(x)).
                         ToList());
             }
         }
 
-        // POST: api/ErrorOccurrences/Delete/1
-        [HttpPost("Delete/{value}")]
-        public ActionResult<ErrorOccurrence> DeleteErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
+        /// <summary>
+        /// Apagar uma ocorrencia 
+        /// </summary>
+        [HttpDelete]
+        public ActionResult<LogErrorOccurrence> DeleteErrorOccurrence([FromBody] LogErrorOccurrenceDTO value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (_service.ConsultErrorOccurrenceById(value.ErrorOccurrenceId) == null)
+            if (_service.ConsultErrorOccurrenceById(value.ErrorId) == null)
                 return BadRequest("400 BadRequest: ErrorOccurence does not exists.");
 
-            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.DeleteErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
+            return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.DeleteErrorOccurrence(_mapper.Map<LogErrorOccurrence>(value))));
         }
-
-        // POST: api/ErrorOccurrences/File/1
+        /// <summary>
+        /// Arquiva uma  Ocorrencia de Erro.
+        /// </summary>
+        // api/ErrorOccurrences/File/1
         [HttpPost("File/{value}")]
-        public ActionResult<ErrorOccurrence> FileErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
+        public ActionResult<LogErrorOccurrence> FileErrorOccurrence([FromBody] LogErrorOccurrenceDTO value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (_service.ConsultErrorOccurrenceById(value.ErrorOccurrenceId) == null)
+            if (_service.ConsultErrorOccurrenceById(value.ErrorId) == null)
                 return BadRequest("400 BadRequest: ErrorOccurence does not exists.");
 
-            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.FileErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
+            return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.FileErrorOccurrence(_mapper.Map<LogErrorOccurrence>(value))));
         }
 
-        //GET: api/Errors/1/2/0/0
+        /// <summary>
+        /// Pesquisa Ocorrencia de Erro
+       /// </summary>
+        // api/ErrorOccurrences/File/1
         //[HttpGet("Environment={ambiente}&&OrderBy={campoOrdenacao}&&Field={campoBuscado}&&Search={textoBuscado}")]
         [HttpGet("{ambiente}/{campoOrdenacao}/{campoBuscado}/{textoBuscado}")]
-        public ActionResult<List<ErrorOccurrenceDTO>> GetErrorFilter(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado)
+        public ActionResult<List<LogErrorOccurrenceDTO>> GetErrorFilter(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado)
         {
             var errorOccurrences = _service.Consult(ambiente, campoOrdenacao, campoBuscado, textoBuscado);
 
@@ -107,14 +113,16 @@ namespace CentralDeErrosApi.Controllers
             else
             {
                 return Ok(errorOccurrences.
-                        Select(x => _mapper.Map<ErrorOccurrenceDTO>(x)).
+                        Select(x => _mapper.Map<LogErrorOccurrenceDTO>(x)).
                         ToList());
             }
         }
-
+        /// <summary>
+        /// Pesquisa Ocorrencia de Erro por Id
+        /// </summary>
         // GET: api/ErrorOccurrences/5
         [HttpGet("{id}")]
-        public ActionResult<ErrorOccurrenceDTO> GetErrorOccurrence(int id)
+        public ActionResult<LogErrorOccurrenceDTO> GetErrorOccurrence(int id)
         {
             var errorOccurrence = _service.ConsultErrorOccurrenceById(id);
 
@@ -123,21 +131,23 @@ namespace CentralDeErrosApi.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<ErrorOccurrenceDTO>(errorOccurrence));
+            return Ok(_mapper.Map<LogErrorOccurrenceDTO>(errorOccurrence));
         }
-
+        /// <summary>
+        /// Altera Ocorrencia de Erro 
+        /// </summary>
         // PUT: api/ErrorOccurrences/5
         [HttpPut("{id}")]
-        public ActionResult<ErrorOccurrenceDTO> PutErrorOccurrence(int id, ErrorOccurrence errorOccurrence)
+        public ActionResult<LogErrorOccurrenceDTO> PutErrorOccurrence(int id, LogErrorOccurrence errorOccurrence)
         {
-            if (id != errorOccurrence.ErrorOccurrenceId)
+            if (id != errorOccurrence.ErrorId)
             {
                 return BadRequest();
             }
 
             try
             {
-                return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(errorOccurrence)));
+                return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(errorOccurrence)));
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -151,24 +161,23 @@ namespace CentralDeErrosApi.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// Cadastra Ocorrencia de Erro 
+        /// </summary>
         // POST: api/ErrorOccurrences
         [HttpPost]
-        public ActionResult<ErrorOccurrence> PostErrorOccurrence([FromBody] ErrorOccurrenceDTO value)
+        public ActionResult<LogErrorOccurrence> PostErrorOccurrence([FromBody] LogErrorOccurrenceDTO value)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_userService.UserExists(value.UserId))
-                return BadRequest("400 BadRequest: User does not exists.");
-
-            if (!_errorService.ErrorExists(value.ErrorId))
-                return BadRequest("400 BadRequest: Error does not exists.");
+          /*  if (!_userService.UserExists(value.UserId))
+                return BadRequest("400 BadRequest: User does not exists.");*/
 
             if (!_situationService.SituationExists(value.SituationId))
                 return BadRequest("400 BadRequest: Situation does not exists.");
 
-            return Ok(_mapper.Map<ErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(_mapper.Map<ErrorOccurrence>(value))));
+            return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.RegisterOrUpdateErrorOccurrence(_mapper.Map<LogErrorOccurrence>(value))));
         }
     }
 }
