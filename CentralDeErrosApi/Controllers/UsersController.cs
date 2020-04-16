@@ -1,29 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
-using CentralDeErrosApi.Infrastrutura;
+using CentralDeErrosApi.Data;
 using CentralDeErrosApi.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CentralDeErros.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsersController : ControllerBase
     {
+    
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UsersController(ApplicationContext context)
+        public UsersController( ApplicationContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
-
-
+        /// <summary>
+        /// Listar os usuarios
+        /// </summary>
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
@@ -31,51 +36,7 @@ namespace CentralDeErros.Api.Controllers
             return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Users>> GetUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
-        }
-
-
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, Users user)
-        {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
+        /// Criar um usuario
         // POST: api/Users
         [HttpPost]
         public async Task<ActionResult<Users>> PostUser(Users user)
@@ -84,27 +45,54 @@ namespace CentralDeErros.Api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            
         }
 
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Users>> DeleteUser(int id)
+        /// Criar um usuario e gerar token
+        [HttpPost("Login")]
+        public async Task<ActionResult<UserToken>> Login([FromBody] Users requestUser)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            
+            if (requestUser.Email == requestUser.Email && requestUser.Password == requestUser.Password)
             {
-                return NotFound();
+                return BuildToken(requestUser);
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return user;
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return BadRequest(ModelState);
+            }
         }
 
-        private bool UserExists(int id)
+        private UserToken BuildToken(Users user)
         {
-            return _context.Users.Any(e => e.UserId == id);
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+
+            };
+
+            var Key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
+            var credenciais = new SigningCredentials(new SymmetricSecurityKey(Key), SecurityAlgorithms.HmacSha256);
+
+
+            // Tempo de expiração do token
+            var expires = DateTime.Now.AddMinutes(30);
+
+            JwtSecurityToken token = new JwtSecurityToken(
+               issuer: "acelera dev",
+                audience: "acelera dev",
+                claims: claims,
+                signingCredentials: credenciais);
+
+            return new UserToken()
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Expiration = expires
+
+            };
         }
+
     }
 }

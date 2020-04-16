@@ -1,11 +1,9 @@
-﻿using CentralDeErrosApi.Infrastrutura;
+﻿using CentralDeErrosApi.Data;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Service
 {

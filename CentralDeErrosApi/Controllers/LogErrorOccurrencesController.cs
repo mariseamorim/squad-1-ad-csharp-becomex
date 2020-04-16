@@ -47,27 +47,7 @@ namespace CentralDeErrosApi.Controllers
                         ToList());
             }
         }
-        /// <summary>
-        /// Listar uma ocorrencia por LevelId.
-        /// </summary>
-        // GET api/<controller>/{id}
-        [HttpGet("Level={levelId}")]
-        public ActionResult<IEnumerable<LogErrorOccurrenceDTO>> GetErrorOccurrencesByLevel(int levelId)
-        {
-            var errorOccurrences = _service.ListOccurencesByLevel(levelId);
-
-            if (errorOccurrences == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(errorOccurrences.
-                        Select(x => _mapper.Map<LogErrorOccurrenceDTO>(x)).
-                        ToList());
-            }
-        }
-
+      
         /// <summary>
         /// Apagar uma ocorrencia 
         /// </summary>

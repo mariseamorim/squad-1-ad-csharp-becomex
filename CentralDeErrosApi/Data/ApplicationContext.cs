@@ -1,7 +1,7 @@
 ﻿using CentralDeErrosApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CentralDeErrosApi.Infrastrutura
+namespace CentralDeErrosApi.Data
 {
     public class ApplicationContext : DbContext
     {
@@ -22,9 +22,9 @@ namespace CentralDeErrosApi.Infrastrutura
         }
 
        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {       
-                
-            modelBuilder.Entity<LogErrorOccurrence>().HasKey(e => e.ErrorId);
+        {
+
+          
         }
 
     }

@@ -1,10 +1,7 @@
-﻿using CentralDeErrosApi.Infrastrutura;
+﻿using CentralDeErrosApi.Data;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Service
 {
@@ -27,25 +24,6 @@ namespace CentralDeErrosApi.Service
             }
 
             return false;
-        }
-
-        public bool Login(string email, string password)
-        {
-            _context.Users.SingleOrDefault(x => x.Email == email && x.Password == password);
-
-            if (_context.Users.FirstOrDefault(x => x.Email == email && x.Password == password) != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool UserExists(int id)
-        {
-            return _context.Users.Any(u => u.UserId == id);
         }
     }
 }

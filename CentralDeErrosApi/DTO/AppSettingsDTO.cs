@@ -1,4 +1,4 @@
-﻿namespace Pratica_Aula4_Ebtity.Models.DTOs
+﻿namespace CentralDeErrosApi.DTO
 {
     public class AppSettingsDTO
     {

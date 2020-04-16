@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -31,15 +32,5 @@ namespace CentralDeErrosApi.Models
         public string Password { get; set; }
 
 
-        [Column("Token")]
-        [MaxLength(400)]
-        [Required]
-        public string Token { get; set; }
-
-        [Column("Expiration")]
-        [Required]
-        public DateTime Expiration { get; set; }
-
-        public ICollection<LogErrorOccurrence> ErrorOccurrences { get; set; }
     }
 }

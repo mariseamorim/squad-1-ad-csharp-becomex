@@ -20,9 +20,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using CentralDeErrosApi.DTO;
 using CentralDeErrosApi.Models;
-using Microsoft.AspNetCore.Authorization;
-using Pratica_Aula4_Ebtity.Models.DTOs;
+
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using CentralDeErrosApi.Data;
 
 namespace CentralDeErrosApi
 {
@@ -48,39 +50,36 @@ namespace CentralDeErrosApi
             services.AddScoped<IUser, UserService>();
             services.AddDbContext<ApplicationContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("CentralDeErros")));
-            //jorge incluido
+            services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
+
+
             services.AddCors();
             var appSettingsSection = Configuration.GetSection("AppSettings");
-            services.Configure<Users>(appSettingsSection);
-
+           
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => {
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "macoratti.net",
-                    ValidAudience = "macoratti.net",
+                    RequireExpirationTime = false,
+                    ValidIssuer = "acelera dev",
+                    ValidAudience = "acelera dev",
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(Configuration["Secret"]))
+                        Encoding.UTF8.GetBytes(Configuration["Secret"])),
+                    ClockSkew = TimeSpan.Zero,
                 };
 
-                options.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = context =>
-                    {
-                        Console.WriteLine("Token inválido..:. " + context.Exception.Message);
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = context =>
-                    {
-                        Console.WriteLine("Toekn válido...: " + context.SecurityToken);
-                        return Task.CompletedTask;
-                    }
-                };
+               
             });
+
+            
 
             services.AddSwaggerGen(swagger =>
             {
