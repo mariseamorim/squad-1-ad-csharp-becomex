@@ -19,36 +19,43 @@ namespace CentralDeErrosApi.Models
         [StringLength(200)]
         [Required]
         public string Origin { get; set; }
-        [ForeignKey("Environment_Id"), Required]
-        public int Environmente_Id { get; set; }
-
-        [Column("Title")]
-        [StringLength(200)]
-        [Required]
-        public string Title { get; set; }
-
-        [Column("CodeErro")]
-        [Required]
-        public int Code { get; set; }
+      
 
         [Column("Details")]
         [StringLength(2000)]
         [Required]
         public string Details { get; set; }
 
-        [Column("Environment_Id"), Required]
-        public Situation Situation { get; set; }
-
-        [ForeignKey("Level_Id"), Required]
-        public int LevelId { get; set; }
-
         [Column("Date_Time")]
         [Required]
         public DateTime DateTime { get; set; }
 
-        [ForeignKey("Situation_Id"), Required]
+       /* [Column("USER_ID"), Required]
+        public int  UserId { get; set; }
+
+        [Column("USER_ID"), Required]
+        public Users User { get; set; }// referencia */
+
+        [Column("Situation_Id"), Required]
         public int SituationId { get; set; }
 
-       
+        [ForeignKey("Environment_Id"), Required]
+        public int Environmente_Id { get; set; }
+
+        [Column("CodeErro")]
+        [Required]
+        public int Code { get; set; }
+
+        [ForeignKey("Level_Id"), Required]
+        public int LevelId { get; set; }
+
+        [Column("Title")]
+        [StringLength(200)]
+        [Required]
+        public string Title { get; set; }
+
+        [Column("SITUATION_ID"), Required]
+        public Situation Situation { get; set; }// referencia 
+
     }
 }

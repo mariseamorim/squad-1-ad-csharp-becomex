@@ -18,45 +18,22 @@ namespace CentralDeErrosApi.Service
         {
             _context = context;
             _situationService = situationService;
-            
+
         }
 
         public LogErrorOccurrence RegisterOrUpdateErrorOccurrence(LogErrorOccurrence errorOccurrence)
         {
-            if (//_context.Users.Any(u => u.UserId == errorOccurrence.UserId) &&
-                 _context.LogErrorOccurrence.Any(e => e.ErrorId == errorOccurrence.ErrorId) &&
-                 _context.Situations.Any(s => s.SituationId == errorOccurrence.SituationId))
-            {
-                var state = errorOccurrence.ErrorId == 0 ? EntityState.Added : EntityState.Modified;
-                _context.LogErrorOccurrence.Add(errorOccurrence);
-                _context.SaveChanges();
-            }
+            var state = errorOccurrence.ErrorId == 0 ? EntityState.Added : EntityState.Modified;
+            _context.LogErrorOccurrence.Add(errorOccurrence);
+            _context.SaveChanges();
 
             return errorOccurrence;
         }
 
-        public List<LogErrorOccurrence> Consult(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado)
+        public List<LogErrorOccurrence> ConsultAllOccurrence()
         {
-            List<LogErrorOccurrence> errorOccurrenceList = new List<LogErrorOccurrence>();
-
-            foreach (var item in errorOccurrenceList)
-            {
-                var occList = _context.LogErrorOccurrence.Where(x => x.ErrorId == item.ErrorId).ToList();
-
-                foreach (var itemOcc in occList)
-                {
-                    errorOccurrenceList.Add(itemOcc);
-                }
-            }
-            return errorOccurrenceList;
+            return _context.LogErrorOccurrence.Select(a => a).ToList();
         }
-
-        public class Occurrences
-        {
-            public int ErrorId { get; set; }
-            public int Quantity { get; set; }
-        }
-
         public List<LogErrorOccurrence> ListOccurencesByLevel(int level)
         {
             return _context.LogErrorOccurrence.Where(o => o.LevelId == level).ToList();
@@ -67,28 +44,6 @@ namespace CentralDeErrosApi.Service
             return _context.LogErrorOccurrence.Any(e => e.ErrorId == id);
         }
 
-        public LogErrorOccurrence FileErrorOccurrence(LogErrorOccurrence errorOccurrence)
-        {
-            if (//_context.Users.Any(u => u.UserId == errorOccurrence.UserId) &&
-                 _context.LogErrorOccurrence.Any(e => e.ErrorId == errorOccurrence.ErrorId) &&
-                 _context.Situations.Any(s => s.SituationId == errorOccurrence.SituationId))
-            {
-                var state = errorOccurrence.ErrorId == 0 ? EntityState.Added : EntityState.Modified;
-                var FileErrorOccurrence = errorOccurrence.Situation;
-
-                if (_situationService.ConsultSituationByName("Arquivado") == null)
-                    return null;
-
-                errorOccurrence.Situation = _situationService.ConsultSituationByName("Arquivado");
-                errorOccurrence.SituationId = _situationService.ConsultSituationByName("Arquivado").SituationId;
-
-                _context.Entry(errorOccurrence).State = state;
-                _context.SaveChanges();
-            }
-
-            return errorOccurrence;
-        }
-
         public LogErrorOccurrence DeleteErrorOccurrence(LogErrorOccurrence errorOccurrence)
         {
             if (//_context.Users.Any(u => u.UserId == errorOccurrence.UserId) &&
@@ -96,7 +51,7 @@ namespace CentralDeErrosApi.Service
                   _context.Situations.Any(s => s.SituationId == errorOccurrence.SituationId))
             {
                 var state = errorOccurrence.ErrorId == 0 ? EntityState.Added : EntityState.Modified;
-                var FileErrorOccurrence = errorOccurrence.Situation;
+                var FileErrorOccurrence = errorOccurrence.SituationId;
 
                 if (_situationService.ConsultSituationByName("Arquivado") == null)
                     return null;

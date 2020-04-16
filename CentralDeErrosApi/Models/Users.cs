@@ -36,7 +36,7 @@ namespace CentralDeErrosApi.Models
         [Required]
         public string Token { get; set; }
 
-        [Column("EXPIRATION")]
+        [Column("Expiration")]
         [Required]
         public DateTime Expiration { get; set; }
 

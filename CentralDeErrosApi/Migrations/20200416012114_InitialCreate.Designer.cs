@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CentralDeErrosApi.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200404205644_ReviewColums")]
-    partial class ReviewColums
+    [Migration("20200416012114_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,7 +25,7 @@ namespace CentralDeErrosApi.Migrations
                 {
                     b.Property<int>("EnvironmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("ID")
+                        .HasColumnName("Id")
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -94,6 +94,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(200);
 
                     b.Property<int>("SituationId")
+                        .HasColumnName("Situation_Id")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -102,14 +103,15 @@ namespace CentralDeErrosApi.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<int?>("UsersUserId")
+                    b.Property<int>("UserId")
+                        .HasColumnName("USER_ID")
                         .HasColumnType("int");
 
                     b.HasKey("ErrorId");
 
                     b.HasIndex("SituationId");
 
-                    b.HasIndex("UsersUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("LogErrorOccurrence");
                 });
@@ -148,7 +150,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(100);
 
                     b.Property<DateTime>("Expiration")
-                        .HasColumnName("EXPIRATION")
+                        .HasColumnName("Expiration")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -182,9 +184,11 @@ namespace CentralDeErrosApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CentralDeErrosApi.Models.Users", null)
+                    b.HasOne("CentralDeErrosApi.Models.Users", "User")
                         .WithMany("ErrorOccurrences")
-                        .HasForeignKey("UsersUserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

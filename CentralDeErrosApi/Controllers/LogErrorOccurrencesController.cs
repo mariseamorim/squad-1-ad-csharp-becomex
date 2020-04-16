@@ -6,6 +6,7 @@ using AutoMapper;
 using CentralDeErrosApi.DTO;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     public class LogErrorOccurrencesController : ControllerBase
     {
         private readonly ILogErrorOccurrence  _service;
@@ -32,7 +34,7 @@ namespace CentralDeErrosApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<LogErrorOccurrenceDTO>> Get()
         {
-            var errorOccurrences = _service.ListOccurencesByLevel(1);
+            var errorOccurrences = _service.ConsultAllOccurrence();
 
             if (errorOccurrences == null)
             {
@@ -80,43 +82,7 @@ namespace CentralDeErrosApi.Controllers
 
             return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.DeleteErrorOccurrence(_mapper.Map<LogErrorOccurrence>(value))));
         }
-        /// <summary>
-        /// Arquiva uma  Ocorrencia de Erro.
-        /// </summary>
-        // api/ErrorOccurrences/File/1
-        [HttpPost("File/{value}")]
-        public ActionResult<LogErrorOccurrence> FileErrorOccurrence([FromBody] LogErrorOccurrenceDTO value)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (_service.ConsultErrorOccurrenceById(value.ErrorId) == null)
-                return BadRequest("400 BadRequest: ErrorOccurence does not exists.");
-
-            return Ok(_mapper.Map<LogErrorOccurrenceDTO>(_service.FileErrorOccurrence(_mapper.Map<LogErrorOccurrence>(value))));
-        }
-
-        /// <summary>
-        /// Pesquisa Ocorrencia de Erro
-       /// </summary>
-        // api/ErrorOccurrences/File/1
-        //[HttpGet("Environment={ambiente}&&OrderBy={campoOrdenacao}&&Field={campoBuscado}&&Search={textoBuscado}")]
-        [HttpGet("{ambiente}/{campoOrdenacao}/{campoBuscado}/{textoBuscado}")]
-        public ActionResult<List<LogErrorOccurrenceDTO>> GetErrorFilter(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado)
-        {
-            var errorOccurrences = _service.Consult(ambiente, campoOrdenacao, campoBuscado, textoBuscado);
-
-            if (errorOccurrences == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(errorOccurrences.
-                        Select(x => _mapper.Map<LogErrorOccurrenceDTO>(x)).
-                        ToList());
-            }
-        }
+       
         /// <summary>
         /// Pesquisa Ocorrencia de Erro por Id
         /// </summary>

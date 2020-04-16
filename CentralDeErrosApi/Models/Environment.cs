@@ -7,7 +7,7 @@ namespace CentralDeErrosApi.Models
     [Table("Environment")]
     public class Environment
     {
-        [Column("ID")]
+        [Column("Id")]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int EnvironmentId { get; set; }

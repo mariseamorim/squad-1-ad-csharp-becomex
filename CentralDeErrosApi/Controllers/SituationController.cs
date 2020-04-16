@@ -6,6 +6,7 @@ using AutoMapper;
 using CentralDeErrosApi.DTO;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SituationController : Controller
     {
         private readonly ISituation _service;

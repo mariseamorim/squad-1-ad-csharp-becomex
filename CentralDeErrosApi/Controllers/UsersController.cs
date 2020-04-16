@@ -2,61 +2,109 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CentralDeErrosApi.DTO;
-using CentralDeErrosApi.Service;
-using Microsoft.AspNetCore.Identity;
+using CentralDeErrosApi.Infrastrutura;
+using CentralDeErrosApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace CentralDeErrosApi.Controllers
+
+namespace CentralDeErros.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class UsersController : Controller
+    [ApiController]
+    [Authorize]
+    public class UsersController : ControllerBase
     {
-        private readonly UserService _userManagementService;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ApplicationContext _context;
 
-        public UsersController(UserService userManagementService,
-                                SignInManager<IdentityUser> signInManager)
+        public UsersController(ApplicationContext context)
         {
-            _signInManager = signInManager;
-            _userManagementService = userManagementService;
+            _context = context;
         }
 
-        [HttpPost("Registrar")]
-        public async Task<ActionResult> Registrar(RegisterUserViewModel viewModel)
+
+        // GET: api/Users
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState.Values.SelectMany(e => e.Errors));
-
-           // var result = await _userManagementService.Create(viewModel);
-
-            //if (!result.Succeeded) return BadRequest(result.Errors);
-
-            viewModel.Senha = "";
-            viewModel.ConfirmaSenha = "";
-
-            return Ok(viewModel);
+            return await _context.Users.ToListAsync();
         }
 
-        [HttpPost("Entrar")]
-        public async Task<ActionResult<dynamic>> Login(LoginUserViewModel viewModel)
+        // GET: api/Users/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Users>> GetUser(int id)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState.Values.SelectMany(e => e.Errors));
+            var user = await _context.Users.FindAsync(id);
 
-            var result = await _signInManager.PasswordSignInAsync(viewModel.Email, viewModel.Senha, false, true);
-            
-            if (!result.Succeeded)
-                return BadRequest("Usuário ou senha inválido.");
-            
-            //jorge incluido
-            var token = TokenService.GenerateToken(result);
-            return new
+            if (user == null)
             {
-                result,
-                token
+                return NotFound();
+            }
 
-            };
+            return user;
+        }
 
-           // return Ok(viewModel);//(await _userManagementService.GerarJWT(viewModel.Email));
+
+        // PUT: api/Users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser(int id, Users user)
+        {
+            if (id != user.UserId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Users
+        [HttpPost]
+        public async Task<ActionResult<Users>> PostUser(Users user)
+        {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+        }
+
+        // DELETE: api/Users/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Users>> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return user;
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

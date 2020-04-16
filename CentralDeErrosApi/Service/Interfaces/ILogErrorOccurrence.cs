@@ -14,11 +14,9 @@ namespace CentralDeErrosApi.Interfaces
 
         List<LogErrorOccurrence> ListOccurencesByLevel(int level);
 
-        List<LogErrorOccurrence> Consult(int ambiente, int campoOrdenacao, int campoBuscado, string textoBuscado);
+        List<LogErrorOccurrence> ConsultAllOccurrence();
 
         bool ErrorOccurrenceExists(int id);
-
-        LogErrorOccurrence FileErrorOccurrence(LogErrorOccurrence errorOccurrence);
 
         LogErrorOccurrence DeleteErrorOccurrence(LogErrorOccurrence errorOccurrence);
     }

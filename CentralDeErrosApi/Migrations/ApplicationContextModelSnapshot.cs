@@ -23,7 +23,7 @@ namespace CentralDeErrosApi.Migrations
                 {
                     b.Property<int>("EnvironmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("ID")
+                        .HasColumnName("Id")
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -92,6 +92,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(200);
 
                     b.Property<int>("SituationId")
+                        .HasColumnName("Situation_Id")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -146,7 +147,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(100);
 
                     b.Property<DateTime>("Expiration")
-                        .HasColumnName("EXPIRATION")
+                        .HasColumnName("Expiration")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")

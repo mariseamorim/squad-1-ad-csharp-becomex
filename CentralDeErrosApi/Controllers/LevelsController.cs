@@ -4,12 +4,14 @@ using AutoMapper;
 using CentralDeErrosApi.DTO;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     public class LevelsController : Controller
     {
         private readonly ILevel _service;

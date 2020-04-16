@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CentralDeErrosApi.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200404201559_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20200416020858_AddReviews")]
+    partial class AddReviews
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,7 +25,7 @@ namespace CentralDeErrosApi.Migrations
                 {
                     b.Property<int>("EnvironmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("ID")
+                        .HasColumnName("Id")
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -81,9 +81,6 @@ namespace CentralDeErrosApi.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasMaxLength(2000);
 
-                    b.Property<int>("EnvironmentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Environmente_Id")
                         .HasColumnType("int");
 
@@ -97,6 +94,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(200);
 
                     b.Property<int>("SituationId")
+                        .HasColumnName("Situation_Id")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -105,17 +103,10 @@ namespace CentralDeErrosApi.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("UsersUserId")
                         .HasColumnType("int");
 
                     b.HasKey("ErrorId");
-
-                    b.HasIndex("EnvironmentId");
-
-                    b.HasIndex("LevelId");
 
                     b.HasIndex("SituationId");
 
@@ -158,7 +149,7 @@ namespace CentralDeErrosApi.Migrations
                         .HasMaxLength(100);
 
                     b.Property<DateTime>("Expiration")
-                        .HasColumnName("EXPIRATION")
+                        .HasColumnName("Expiration")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -186,20 +177,8 @@ namespace CentralDeErrosApi.Migrations
 
             modelBuilder.Entity("CentralDeErrosApi.Models.LogErrorOccurrence", b =>
                 {
-                    b.HasOne("CentralDeErrosApi.Models.Environment", "Environment")
-                        .WithMany()
-                        .HasForeignKey("EnvironmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CentralDeErrosApi.Models.Level", "Level")
-                        .WithMany()
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CentralDeErrosApi.Models.Situation", "Situation")
-                        .WithMany("ErrorOccurrences")
+                        .WithMany()
                         .HasForeignKey("SituationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

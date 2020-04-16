@@ -17,6 +17,12 @@ using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Reflection;
 using System;
+using Microsoft.EntityFrameworkCore;
+using CentralDeErrosApi.DTO;
+using CentralDeErrosApi.Models;
+using Microsoft.AspNetCore.Authorization;
+using Pratica_Aula4_Ebtity.Models.DTOs;
+using System.Threading.Tasks;
 
 namespace CentralDeErrosApi
 {
@@ -39,29 +45,42 @@ namespace CentralDeErrosApi
             services.AddScoped<ILogErrorOccurrence, LogErrorOccrurence>();
             services.AddScoped<ILevel, LevelService>();
             services.AddScoped<ISituation, SituationService>();
-            services.AddControllers();
+            services.AddScoped<IUser, UserService>();
+            services.AddDbContext<ApplicationContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("CentralDeErros")));
             //jorge incluido
             services.AddCors();
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<Users>(appSettingsSection);
 
-            //jorge incluido
-            var key = Encoding.ASCII.GetBytes(Settings.Secret);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(x =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    x.RequireHttpsMetadata = false;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "macoratti.net",
+                    ValidAudience = "macoratti.net",
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["Secret"]))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
                     {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+                        Console.WriteLine("Token inválido..:. " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("Toekn válido...: " + context.SecurityToken);
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
             services.AddSwaggerGen(swagger =>
             {
@@ -78,21 +97,21 @@ namespace CentralDeErrosApi
                        Email = "marisemfs@gmail.com"
                    }
                });
-                /*  swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+                swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                  {
                      Type = SecuritySchemeType.Http,
                      BearerFormat = "JWT",
                      In = ParameterLocation.Header,
                      Scheme = "bearer"
-                 });*/
-                /*swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
+                 });
+                swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
                 string applicationPath =
                 PlatformServices.Default.Application.ApplicationBasePath;
                 string applicationName =
                 PlatformServices.Default.Application.ApplicationName;
                 string xmlPathDoc =
                 Path.Combine(applicationPath, $"{applicationName}.xml");
-                swagger.IncludeXmlComments(xmlPathDoc);*/
+                swagger.IncludeXmlComments(xmlPathDoc);
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -100,7 +119,6 @@ namespace CentralDeErrosApi
             });    
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
@@ -131,8 +149,8 @@ namespace CentralDeErrosApi
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json",
-                    "Projeto Final");
+                string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
+                c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "Projeto Final");
             });
 
         }

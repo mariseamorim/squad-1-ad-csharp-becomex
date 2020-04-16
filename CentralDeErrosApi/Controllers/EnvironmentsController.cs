@@ -12,7 +12,7 @@ namespace CentralDeErrosApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class EnvironmentsController : ControllerBase
     {
         private readonly IEnvironment _service;
