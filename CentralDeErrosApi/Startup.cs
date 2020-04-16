@@ -51,6 +51,10 @@ namespace CentralDeErrosApi
             services.AddDbContext<ApplicationContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("CentralDeErros")));
             services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
+            services.AddMvc(options =>
+            {
+                options.SuppressAsyncSuffixInActionNames = false;
+            });
 
 
             services.AddCors();
@@ -126,7 +130,6 @@ namespace CentralDeErrosApi
                 app.UseDeveloperExceptionPage();
             }
 
-            // jorge incluido
             app.UseRouting();
 
             app.UseCors(x => x
