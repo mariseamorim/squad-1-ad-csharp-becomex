@@ -1,6 +1,4 @@
-﻿
-
-namespace CentralDeErrosApi.DTO
+﻿namespace CentralDeErrosApi.DTO
 {
     public class EnvironmentDTO
     {

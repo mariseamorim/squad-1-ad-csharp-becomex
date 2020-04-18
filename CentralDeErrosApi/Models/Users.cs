@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CentralDeErrosApi.Models
 {
     [Table("Users")]
     public class Users
-    {        
+    {
         [Column("Id")]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -30,7 +28,6 @@ namespace CentralDeErrosApi.Models
         [Required]
         public string Password { get; set; }
 
-
         [Column("Token")]
         [MaxLength(400)]
         [Required]
@@ -40,6 +37,6 @@ namespace CentralDeErrosApi.Models
         [Required]
         public DateTime Expiration { get; set; }
 
-        public ICollection<LogErrorOccurrence> ErrorOccurrences { get; set; }
+        private ICollection<LogErrorOccurrence> ErrorOccurrences { get; set; }
     }
 }

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using CentralDeErrosApi.Infrastrutura;
 using CentralDeErrosApi.Models;
+using CentralDeErrosApi.Models.ViewModels;
+using CentralDeErrosApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Configuration;
 
 namespace CentralDeErros.Api.Controllers
 {
@@ -17,88 +19,72 @@ namespace CentralDeErros.Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationContext _context;
+        private readonly UserManagementService _userManagementService;
 
-        public UsersController(ApplicationContext context)
+        public UsersController(IConfiguration configuration, ApplicationContext context)
         {
             _context = context;
+            _userManagementService = new UserManagementService(configuration, context);
         }
 
-
-        // GET: api/Users
+        /// <summary>
+        /// Listar todos os usuários.
+        /// </summary>
+        // GET: api/GetUsers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Users>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
-            {
                 return NotFound();
-            }
 
             return user;
         }
 
-
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, Users user)
+        /// <summary>
+        /// Atualiza o token do usuário.
+        /// </summary>
+        // GET: api/AtualizeTokenUser
+        [HttpPost("AtualizarToken")]
+        public async Task<IActionResult> AtualizeTokenUser(UserViewModel user)
         {
-            if (id != user.UserId)
+            if (!_userManagementService.ValidateUserExistByEmail(user.Email))
+                return BadRequest("Email informado não cadastrado.");
+            else if (!_userManagementService.ValidateUserLogin(user.Email, user.Password))
+                return BadRequest("Senha informada incorreta.");
+            else
             {
-                return BadRequest();
-            }
+                Users userFinded = _context.Users.First(e => e.Email == user.Email && e.Password == user.Password);
+                userFinded.Token = _userManagementService.RecoverJWT(user.Email);
+                userFinded.Expiration = DateTime.Now.AddHours(_userManagementService.GetExpirationHours());
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
+                _context.Entry(userFinded).State = EntityState.Modified;
+                _context.Users.Update(userFinded);
                 await _context.SaveChangesAsync();
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
-        // POST: api/Users
-        [HttpPost]
-        public async Task<ActionResult<Users>> PostUser(Users user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-        }
-
-        // DELETE: api/Users/5
+        /// <summary>
+        /// Deleta um usuário.
+        /// </summary>
+        // GET: api/DeleteUser
         [HttpDelete("{id}")]
         public async Task<ActionResult<Users>> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
-            {
                 return NotFound();
-            }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-
             return user;
         }
 

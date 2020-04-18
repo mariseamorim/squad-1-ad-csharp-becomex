@@ -16,7 +16,5 @@ namespace CentralDeErrosApi.Models
         [StringLength(30)]
         [Required]
         public string EnvironmentName { get; set; }
-
-
     }
 }

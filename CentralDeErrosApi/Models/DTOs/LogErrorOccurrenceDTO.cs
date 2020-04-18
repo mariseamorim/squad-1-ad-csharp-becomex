@@ -16,9 +16,6 @@ namespace CentralDeErrosApi.DTO
         [Required]
         public DateTime DateTime { get; set; }
 
-        /*[Required]
-        public int UserId { get; set; }*/
-
         [Required]
         public int SituationId { get; set; }
 
@@ -33,6 +30,5 @@ namespace CentralDeErrosApi.DTO
 
         [Required]
         public string Title { get; set; }
-
     }
 }

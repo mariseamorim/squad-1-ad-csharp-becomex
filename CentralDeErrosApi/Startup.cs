@@ -1,28 +1,23 @@
+using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using CentralDeErrosApi.Infrastrutura;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using AutoMapper;
 using CentralDeErrosApi.Interfaces;
-using CentralDeErrosApi.Service;
+using CentralDeErrosApi.Infrastrutura;
 using CentralDeErrosApi.Infrastrutura.CustomFilters;
-using Microsoft.Extensions.PlatformAbstractions;
-using System.IO;
-using System.Reflection;
-using System;
-using Microsoft.EntityFrameworkCore;
-using CentralDeErrosApi.DTO;
-using CentralDeErrosApi.Models;
-using Microsoft.AspNetCore.Authorization;
-using Pratica_Aula4_Ebtity.Models.DTOs;
-using System.Threading.Tasks;
+using CentralDeErrosApi.Models.DTOs;
+using CentralDeErrosApi.Service;
 
 namespace CentralDeErrosApi
 {
@@ -37,37 +32,89 @@ namespace CentralDeErrosApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationContext>(x => x.UseSqlServer(Configuration.GetConnectionString("CentralDeErros")));
+            
+            ConfigureScopes(services);
+            ConfigureToken(services, Configuration);
+            ConfigureSwagger(services);
+        }
 
-            services.AddDbContext<ApplicationContext>();
-            services.AddScoped<IEnvironment, EnvironmentService>();
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+                app.UseDeveloperExceptionPage();
+            else
+                app.UseHsts();
+
+            app.UseRouting();
+
+            app.UseCors(x => x
+           .AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader());
+
+            app.UseHttpsRedirection();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
+                c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "Projeto Final");
+            });
+        }
+
+        public void ConfigureScopes(IServiceCollection services)
+        {
+            services.AddCors();
             services.AddControllers();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+            services.AddScoped<IEnvironment, EnvironmentService>();
             services.AddScoped<ILogErrorOccurrence, LogErrorOccrurence>();
             services.AddScoped<ILevel, LevelService>();
             services.AddScoped<ISituation, SituationService>();
-            services.AddScoped<IUser, UserService>();
-            services.AddDbContext<ApplicationContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("CentralDeErros")));
-            //jorge incluido
-            services.AddCors();
-            var appSettingsSection = Configuration.GetSection("AppSettings");
-            services.Configure<Users>(appSettingsSection);
+            services.AddScoped<IUser, UserManagementService>();
+        }
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options => {
-                options.TokenValidationParameters = new TokenValidationParameters
+        private static void ConfigureToken(IServiceCollection services, IConfiguration configuration)
+        {
+            var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettingsDTO>(appSettingsSection);
+            var appSettings = appSettingsSection.Get<AppSettingsDTO>();
+
+            var authenticationSection = configuration.GetSection("Authentication");
+            services.Configure<AuthenticationDTO>(authenticationSection);
+            var authentication = authenticationSection.Get<AuthenticationDTO>();
+
+            var key = Encoding.ASCII.GetBytes(authentication.Secret);
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.SaveToken = true;
+                x.RequireHttpsMetadata = true;
+                x.TokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "macoratti.net",
-                    ValidAudience = "macoratti.net",
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(Configuration["Secret"]))
+                    ValidAudience = appSettings.Audiencia,
+                    ValidIssuer = appSettings.Emissor,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
                 };
 
-                options.Events = new JwtBearerEvents
+                x.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
                     {
@@ -81,6 +128,13 @@ namespace CentralDeErrosApi
                     }
                 };
             });
+        }
+
+        public void ConfigureSwagger(IServiceCollection services)
+        {
+            string applicationPath = PlatformServices.Default.Application.ApplicationBasePath;
+            string applicationName = PlatformServices.Default.Application.ApplicationName;
+            string xmlPathDoc = Path.Combine(applicationPath, $"{applicationName}.xml");
 
             services.AddSwaggerGen(swagger =>
             {
@@ -97,62 +151,18 @@ namespace CentralDeErrosApi
                        Email = "marisemfs@gmail.com"
                    }
                });
+
                 swagger.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
-                 {
-                     Type = SecuritySchemeType.Http,
-                     BearerFormat = "JWT",
-                     In = ParameterLocation.Header,
-                     Scheme = "bearer"
-                 });
+                {
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Scheme = "bearer"
+                });
+
                 swagger.OperationFilter<AuthenticationRequirementsOperationFilter>();
-                string applicationPath =
-                PlatformServices.Default.Application.ApplicationBasePath;
-                string applicationName =
-                PlatformServices.Default.Application.ApplicationName;
-                string xmlPathDoc =
-                Path.Combine(applicationPath, $"{applicationName}.xml");
                 swagger.IncludeXmlComments(xmlPathDoc);
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                swagger.IncludeXmlComments(xmlPath);
-            });    
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            // jorge incluido
-            app.UseRouting();
-
-            app.UseCors(x => x
-           .AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader());
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
             });
-
-
-            app.UseSwagger();
-
-            app.UseSwaggerUI(c =>
-            {
-                string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
-                c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "Projeto Final");
-            });
-
         }
     }
 }

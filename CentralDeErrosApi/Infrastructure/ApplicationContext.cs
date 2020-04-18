@@ -8,7 +8,8 @@ namespace CentralDeErrosApi.Infrastrutura
         public ApplicationContext(DbContextOptions<ApplicationContext> builder) : base(builder)
         {
 
-        }    
+        }
+
         public DbSet<Users> Users { get; set; }
         public DbSet<LogErrorOccurrence> LogErrorOccurrence { get; set; }
         public DbSet<Situation> Situations { get; set; }
@@ -18,14 +19,12 @@ namespace CentralDeErrosApi.Infrastrutura
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Central_De_Erros;Trusted_Connection=True");
+                optionsBuilder.UseSqlServer(@"Server=LPJOI_0007\SQLEXPRESS;Database=Central_De_Erros;Trusted_Connection=True");
         }
 
-       protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {       
-                
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<LogErrorOccurrence>().HasKey(e => e.ErrorId);
         }
-
     }
 }
