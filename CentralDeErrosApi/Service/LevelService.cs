@@ -1,5 +1,4 @@
-﻿using CentralDeErrosApi.Data;
-using CentralDeErrosApi.Infrastrutura;
+﻿using CentralDeErrosApi.Infrastrutura;
 using CentralDeErrosApi.Interfaces;
 using CentralDeErrosApi.Models;
 using Microsoft.EntityFrameworkCore;

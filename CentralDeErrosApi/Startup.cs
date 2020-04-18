@@ -18,7 +18,6 @@ using CentralDeErrosApi.Infrastrutura;
 using CentralDeErrosApi.Infrastrutura.CustomFilters;
 using CentralDeErrosApi.Models.DTOs;
 using CentralDeErrosApi.Service;
-using CentralDeErrosApi.Data;
 
 namespace CentralDeErrosApi
 {

@@ -1,7 +1,7 @@
 ﻿using CentralDeErrosApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CentralDeErrosApi.Data
+namespace CentralDeErrosApi.Infrastrutura
 {
     public class ApplicationContext : DbContext
     {
