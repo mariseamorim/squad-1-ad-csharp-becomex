@@ -2,7 +2,6 @@
 using CentralDeErrosApi.DTO;
 using CentralDeErrosApi.Models;
 
-
 namespace CentralDeErrosApi
 {
     public class AutoMapperProfile : Profile
@@ -13,7 +12,6 @@ namespace CentralDeErrosApi
             CreateMap<LogErrorOccurrence, LogErrorOccurrenceDTO>().ReverseMap();
             CreateMap<Level, LevelDTO>().ReverseMap();
             CreateMap<Situation, SituationDTO>().ReverseMap();
-            
         }
     }
 }

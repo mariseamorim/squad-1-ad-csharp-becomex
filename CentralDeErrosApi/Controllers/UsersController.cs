@@ -1,113 +1,96 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
-using CentralDeErrosApi.Data;
+using CentralDeErrosApi.Infrastrutura;
 using CentralDeErrosApi.Models;
+using CentralDeErrosApi.Models.ViewModels;
+using CentralDeErrosApi.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CentralDeErros.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
-    
         private readonly ApplicationContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly UserManagementService _userManagementService;
 
-        public UsersController( ApplicationContext context, IConfiguration configuration)
+        public UsersController(IConfiguration configuration, ApplicationContext context)
         {
             _context = context;
-            _configuration = configuration;
+            _userManagementService = new UserManagementService(configuration, context);
         }
+
         /// <summary>
-        /// Listar os usuarios
+        /// Listar todos os usuários.
         /// </summary>
-        // GET: api/Users
+        // GET: api/GetUsers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
 
-
-        // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Users>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
-            {
                 return NotFound();
-            }
 
             return user;
         }
 
-        /// Criar um usuario
-        // POST: api/Users
-        [HttpPost]
-        public async Task<ActionResult<Users>> PostUser(Users user)
+        /// <summary>
+        /// Atualiza o token do usuário.
+        /// </summary>
+        // GET: api/AtualizeTokenUser
+        [HttpPost("AtualizarToken")]
+        public async Task<IActionResult> AtualizeTokenUser(UserViewModel user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-            
-        }
-
-        /// Criar um usuario e gerar token
-        [HttpPost("Login")]
-        public async Task<ActionResult<UserToken>> Login([FromBody] Users requestUser)
-        {
-            
-            if (requestUser.Email == requestUser.Email && requestUser.Password == requestUser.Password)
-            {
-                return BuildToken(requestUser);
-            }
+            if (!_userManagementService.ValidateUserExistByEmail(user.Email))
+                return BadRequest("Email informado não cadastrado.");
+            else if (!_userManagementService.ValidateUserLogin(user.Email, user.Password))
+                return BadRequest("Senha informada incorreta.");
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return BadRequest(ModelState);
+                Users userFinded = _context.Users.First(e => e.Email == user.Email && e.Password == user.Password);
+                userFinded.Token = _userManagementService.RecoverJWT(user.Email);
+                userFinded.Expiration = DateTime.Now.AddHours(_userManagementService.GetExpirationHours());
+
+                _context.Entry(userFinded).State = EntityState.Modified;
+                _context.Users.Update(userFinded);
+                await _context.SaveChangesAsync();
+                return Ok();
             }
         }
 
-        private UserToken BuildToken(Users user)
+        /// <summary>
+        /// Deleta um usuário.
+        /// </summary>
+        // GET: api/DeleteUser
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Users>> DeleteUser(int id)
         {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
 
-            };
-
-            var Key = Encoding.ASCII.GetBytes(_configuration["Secret"]);
-            var credenciais = new SigningCredentials(new SymmetricSecurityKey(Key), SecurityAlgorithms.HmacSha256);
-
-
-            // Tempo de expiração do token
-            var expires = DateTime.Now.AddMinutes(30);
-
-            JwtSecurityToken token = new JwtSecurityToken(
-               issuer: "acelera dev",
-                audience: "acelera dev",
-                claims: claims,
-                signingCredentials: credenciais);
-
-            return new UserToken()
-            {
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Expiration = expires
-
-            };
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
 
+        private bool UserExists(int id)
+        {
+            return _context.Users.Any(e => e.UserId == id);
+        }
     }
 }
